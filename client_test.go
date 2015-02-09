@@ -17,8 +17,9 @@ func (m Message) String() string {
 	return fmt.Sprintf(`
 {
 	"id": "%v",
-	"msg": "Message
-strings: %v"
+	"log": "Message
+strings: %v",
+	"arry": ["your", "a", "wizzard!"]
 }`, m.id, strings.Repeat("TreeTop", m.id%4))
 
 }
