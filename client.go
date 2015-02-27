@@ -51,6 +51,6 @@ func (c *client) Send(body []byte) {
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
 		resp, _ := ioutil.ReadAll(res.Body)
-		fmt.Printf("Error writing to loggly: %v (%v)\n", resp, res.StatusCode)
+		fmt.Printf("Error writing to loggly: %v (%v)\n", string(resp), res.StatusCode)
 	}
 }
