@@ -30,9 +30,15 @@ func NewClient(token string, tags ...string) Client {
 }
 
 func (c *client) Send(body []byte) {
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Printf("Panic writing to loggly: %s", err)
+		}
+	}()
 	req, err := http.NewRequest("POST", api+c.token, bytes.NewBuffer(body))
 	if err != nil {
 		fmt.Printf("Error writing to loggly: %v\n", err)
+		return
 	}
 
 	req.Header.Add("User-Agent", "tt: go-loggly ("+Version+")")
@@ -42,15 +48,15 @@ func (c *client) Send(body []byte) {
 	if len(c.tags) != 0 {
 		req.Header.Add("X-Loggly-Tag", strings.Join(c.tags, ","))
 	}
-
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
 		fmt.Printf("Error writing to loggly: %v\n", err)
+		return
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
 		resp, _ := ioutil.ReadAll(res.Body)
-		fmt.Printf("Error writing to loggly: %v (%v)\n", string(resp), res.StatusCode)
+		fmt.Printf("Error writing to loggly: %s (%v)\n", string(resp), res.StatusCode)
 	}
 }
