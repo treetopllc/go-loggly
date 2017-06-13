@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -37,13 +38,13 @@ func (c *client) Send(body []byte) {
 	}()
 	req, err := http.NewRequest("POST", api+c.token, bytes.NewBuffer(body))
 	if err != nil {
-		fmt.Printf("Error writing to loggly: %v\n", err)
+		fmt.Printf("Error creating loggly request: %v\n", err)
 		return
 	}
 
 	req.Header.Add("User-Agent", "tt: go-loggly ("+Version+")")
 	req.Header.Add("Content-Type", "text/plain")
-	req.Header.Add("Content-Length", string(len(body)))
+	req.Header.Add("Content-Length", strconv.Itoa(len(body)))
 
 	if len(c.tags) != 0 {
 		req.Header.Add("X-Loggly-Tag", strings.Join(c.tags, ","))
@@ -51,12 +52,12 @@ func (c *client) Send(body []byte) {
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		fmt.Printf("Error writing to loggly: %v\n", err)
+		fmt.Printf("Error sending to loggly: %v\n", err)
 		return
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
 		resp, _ := ioutil.ReadAll(res.Body)
-		fmt.Printf("Error writing to loggly: %s (%v)\n", string(resp), res.StatusCode)
+		fmt.Printf("Error response from loggly: %s (%v)\n", string(resp), res.StatusCode)
 	}
 }
